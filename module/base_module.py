@@ -43,6 +43,13 @@ class MiniBatchStd(nn.Module):
 #zero paddingと比べて元の入力に近い分布を実現できるため
 #生成された画像の端付近にアーティファクトができにくくなる
 class Conv2d(nn.Module):
+	'''
+	引数:
+		inch: (int)  入力チャネル数
+		outch: (int) 出力チャネル数
+		kernel_size: (int) カーネルの大きさ
+		padding: (int) パディング
+	'''
 	def __init__(self, inch, outch, kernel_size, padding=0):
 		super().__init__()
 		self.layers = nn.Sequential(

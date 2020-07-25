@@ -8,9 +8,9 @@ class Generator(nn.Module):
 		super().__init__()
 		# conv modules & toRGBs
 		scale = 1
-		inchs  = np.array([512,256,128,64,32,16], dtype=np.uint32)*scale
-		outchs = np.array([256,128, 64,32,16, 8], dtype=np.uint32)*scale
-		sizes = np.array([4,8,16,32,64,128], dtype=np.uint32)
+		inchs  = np.array([512,256,128,64,32, 16], dtype=np.uint32)*scale
+		outchs = np.array([256,128, 64,32,16,  8], dtype=np.uint32)*scale
+		sizes  = np.array([  4,  8, 16,32,64,128], dtype=np.uint32)
 		firsts = np.array([True, False, False, False, False, False], dtype=np.bool)
 		blocks, toRGBs = [], []
 		for s, inch, outch, first in zip(sizes, inchs, outchs, firsts):
