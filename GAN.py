@@ -1,188 +1,147 @@
 #encoding:utf-8
 
 from module.importer import *
-from module.dataloader import *
+from module.base_module import *
 from module.discriminator import *
 from module.generator import *
 
-pixel_size = 64#画像のピクセルサイズ
+#学習と誤差伝搬を行う関数
+def gradient_penalty(netD, real, fake, res, batch_size, gamma=1):
+	device = real.device
+	#requires_gradが有効なTensorに対してはbackwardメソッドが呼べて、自動的に微分を計算できる
+	alpha = torch.rand(batch_size, 1, 1, 1, requires_grad=True).to(device)
+	#学習時、損失関数にはWGAN-GPを用いる
+	x = alpha*real + (1-alpha)*fake
+	#推論を実行、結果をd_とする
+	d_ = netD.forward(x, res)
+	g = torch.autograd.grad(outputs=d_, inputs=x,
+							grad_outputs=torch.ones(d_.shape).to(device),
+							create_graph=True, retain_graph=True,only_inputs=True)[0]
+	g = g.reshape(batch_size, -1)
+	return ((g.norm(2,dim=1)/gamma-1.0)**2).mean()
 
-#ネットワークを初期化
-def weights_init(m):
-	classname = m.__class__.__name__
-	if(classname.find('Conv')!=-1):
-		#Conv2dとConvTranspose2dの初期化
-		nn.init.normal_(m.weight.data,0.0,0.02)
-		nn.init.constant_(m.bias.data,0)
-	elif(classname.find("BatchNorm")!=-1):
-		#BatchNorm2dの初期化
-		nn.init.normal_(m.weight.data,1.0,0.02)
-		nn.init.constant_(m.bias.data,0)
+f __name__ == '__main__':
 
-#初期化の実施
-G = Generator(z_dim=20,image_size=pixel_size)
-D = Discriminator(z_dim=20,image_size=pixel_size)
-G.apply(weights_init)
-D.apply(weights_init)
-print("initalized networks")
+	device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-#モデルを学習させる関数
-def train_model(G,D,dataloader,num_epochs):
-	device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-	print("device:",device)
-	#最適化手法の設定
-	g_lr,d_lr = 0.0001,0.0004
-	beta1,beta2 = 0.0,0.9
-	g_optimizer = torch.optim.Adam(G.parameters(),g_lr,[beta1,beta2])
-	d_optimizer = torch.optim.Adam(D.parameters(),d_lr,[beta1,beta2])
-	#誤差関数の定義
-	#criterion = nn.BCEWithLogitsLoss(reduction="mean")
-	#パラメータ類
-	z_dim = 20
-	mini_batch_size = 5
-	#ネットワークをデバイスに移動
-	G.to(device)
-	D.to(device)
-	G.train()#学習モードに設定
-	D.train()
-	#ネットワークがある程度一定ならば高速化
-	torch.backends.cudnn.benchmark = True
-	#画像の枚数
-	num_train_imgs = len(dataloader.dataset)
-	batch_size = dataloader.batch_size
-	#イテレーションカウンタをセット
-	iteration = 1
-	logs = []
-	#epochのループ
-	for epoch in range(num_epochs):
-		#開始時刻を保存
-		t_epoch_start = time.time()
-		epoch_g_loss = 0.0#epoch損失和
-		epoch_d_loss = 0.0#epoch損失和
-		print("--------------------")
-		print("Epoch {}/{}".format(epoch,num_epochs))
-		print("--------------------")
-		print("(train)")
-		#データローダーからminibatchずつ取り出す
-		for imgs in dataloader:
-			# print(imgs.size())
-			# print(dataloader)
-			# print(iteration)
-			#-------------------------
+	netG = models.Generator().to(device)
+	netD = models.Discriminator().to(device)
+	netG_mavg = models.Generator().to(device) # moving average
+	#generator,discriminatorの誤差伝搬の最適化手法にはAdamを指定
+	optG = torch.optim.Adam(netG.parameters(), lr=0.0005, betas=(0.0, 0.99))
+	optD = torch.optim.Adam(netD.parameters(), lr=0.0005, betas=(0.0, 0.99))
+	criterion = torch.nn.BCELoss()
+
+	# dataset
+	transform = transforms.Compose([transforms.CenterCrop(160),
+	                                transforms.Resize((128,128)),
+	                                transforms.ToTensor(), ])
+
+	trainset = datasets.CelebA('~/data', download=True, split='train',
+	                           transform=transform)
+
+	bs = 8
+	train_loader = DataLoader(trainset, batch_size=bs, shuffle=True)
+
+	#学習開始
+	#エポック数
+	nepoch = 10
+	losses = []
+	res_step = 15000
+	j = 0
+	# constant random inputs
+	z0 = torch.randn(16, 512*16).to(device)
+	#z0はclampを用いて値の下限を-1、上限を1にしておく
+	z0 = torch.clamp(z0, -1.,1.)
+	for iepoch in range(nepoch):
+		if j==res_step*6.5:
+			optG.param_groups[0]['lr'] = 0.0001
+			optD.param_groups[0]['lr'] = 0.0001
+
+		for i, data in enumerate(train_loader):
+			x, y = data
+			x = x.to(device)
+			res = j/res_step
+
+			#generaorの学習
+			#ノイズを生成
+			z = torch.randn(bs, 512*16).to(x.device)
+			#ノイズをgeneratorに入力、出力画像をx_とする
+			x_ = netG.forward(z, res)
+			#出力画像x_をdiscriminatorで推論　つまり偽画像の入力をする
+			d_ = netD.forward(x_, res)
+			# WGAN_GPではミニバッチ内の推論結果全てに対し平均を取り、それを誤差伝搬に使う
+			lossG = -d_.mean()
+
+			optG.zero_grad()
+			lossG.backward()
+			optG.step()
+
+			# update netG_mavg by moving average
+			momentum = 0.995 # remain momentum
+			alpha = min(1.0-(1/(j+1)), momentum)
+			for p_mavg, p in zip(netG_mavg.parameters(), netG.parameters()):
+				p_mavg.data = alpha*p_mavg.data + (1.0-alpha)*p.data
+
 			#discriminatorの学習
-			#-------------------------
-			if(imgs.size()[0]==1): continue#ミニバッチサイズ1だと正規化でエラーになるので避ける
-			#GPUが使えるならGPUへ転送
-			imgs = imgs.to(device)
-			#正解ラベル、偽ラベルを作成
-			#epochの最後のイテレーションはミニバッチの数が少なくなる
-			mini_batch_size = imgs.size()[0]
-			# label_real = torch.full((mini_batch_size,),1).to(device)
-			# label_fake = torch.full((mini_batch_size,),0).to(device)
-			#真の画像を判定
-			d_out_real,_,_ = D(imgs)
-			#偽の画像を生成して判定
-			input_z = torch.randn(mini_batch_size,z_dim).to(device)
-			input_z = input_z.view(input_z.size(0),input_z.size(1),1,1)
-			fake_images,_,_ = G(input_z)
-			d_out_fake,_,_ = D(fake_images)
-			#誤差の計算
-			# d_loss_real = criterion(d_out_real.view(-1),label_real)
-			# d_loss_fake = criterion(d_out_fake.view(-1),label_fake)
-			d_loss_real = torch.nn.ReLU()(1.0-d_out_real).mean()
-			d_loss_fake = torch.nn.ReLU()(1.0+d_out_fake).mean()
-			d_loss = d_loss_real + d_loss_fake
-			#誤差を伝搬
-			g_optimizer.zero_grad()
-			d_optimizer.zero_grad()
-			d_loss.backward()
-			d_optimizer.step()
+			z = torch.randn(x.shape[0], 512*16).to(x.device)
+			x_ = netG.forward(z, res)
+			x = F.adaptive_avg_pool2d(x, x_.shape[2:4])
+			d = netD.forward(x, res)   # real
+			d_ = netD.forward(x_, res) # fake
+			loss_real = -d.mean()
+			loss_fake = d_.mean()
+			loss_gp = gradient_penalty(netD, x.data, x_.data, res, x.shape[0])
+			loss_drift = (d**2).mean()
 
-			#-------------------------
-			#generatorの学習
-			#-------------------------
-			#偽の画像を生成して判定
-			input_z = torch.randn(mini_batch_size,z_dim).to(device)
-			input_z = input_z.view(input_z.size(0),input_z.size(1),1,1)
-			fake_images,_,_ = G(input_z)
-			d_out_fake,_,_ = D(fake_images)
-			#誤差の計算
-			#g_loss = criterion(d_out_fake.view(-1),label_real)
-			g_loss =- d_out_fake.mean()
-			#誤差を伝搬
-			g_optimizer.zero_grad()
-			d_optimizer.zero_grad()
-			g_loss.backward()
-			g_optimizer.step()
+			beta_gp = 10.0
+			beta_drift = 0.001
+			lossD = loss_real + loss_fake + beta_gp*loss_gp + beta_drift*loss_drift
 
-			#-------------------------
-			#記録
-			#-------------------------
-			epoch_d_loss += d_loss.item()
-			epoch_g_loss += g_loss.item()
-			iteration += 1
+			optD.zero_grad()
+			lossD.backward()
+			optD.step()
 
-		#epochのphaseごとのlossと正解率
-		t_epoch_finish = time.time()
-		print("--------------------")
-		print("epoch {} || Epoch_D_Loss:{:.4f} ||Epoch_G_Loss:{:.4f}".format(
-				epoch,epoch_d_loss/batch_size,epoch_g_loss/batch_size))
-		print("timer: {:.4f} sec.".format(t_epoch_finish - t_epoch_start))
-		t_epoch_start = time.time()
-	return G,D
+			print('ep: %02d %04d %04d lossG=%.10f lossD=%.10f' %
+				(iepoch, i, j, lossG.item(), lossD.item()))
 
-#訓練データの読み込み、データセット作成
-train_img_list = make_datapath_list()
-mean = (0.5,)
-std = (0.5,)
-train_dataset = GAN_Img_Dataset(file_list=train_img_list,transform=ImageTransform(mean,std,resize_width_height_pixel=pixel_size))
-# for i in range(0,len(train_dataset)):
-# 	print(str(i))
-# 	print(train_dataset[i].size())
-# print(":::::::::::::::::::::::::::::::::::::")
-#データローダー作成
-batch_size = 5
-train_dataloader = torch.utils.data.DataLoader(train_dataset,batch_size=batch_size,shuffle=True)
+			losses.append([lossG.item(), lossD.item()])
+			j += 1
 
-#epoch数指定
-num_epochs = 3000;
-#モデルを学習させる
-G_update,D_update = train_model(G,D,dataloader=train_dataloader,num_epochs=num_epochs)
+			if j%500==0:
+				netG_mavg.eval()
+				z = torch.randn(16, 512*16).to(x.device)
+				x_0 = netG_mavg.forward(z0, res)
+				x_ = netG_mavg.forward(z, res)
 
-#生成された画像、訓練データを可視化する
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-#入力乱数の生成
-z_dim = 20
-fixed_z = torch.randn(batch_size,z_dim)
-fixed_z = fixed_z.view(fixed_z.size(0),fixed_z.size(1),1,1)
-#画像生成
-fake_images,am1,am2 = G_update(fixed_z.to(device))
-#訓練データ
-batch_iterator = iter(train_dataloader)#イテレータに変換
-imges = next(batch_iterator)#1番目の要素を取り出す
+				dst = torch.cat((x_0, x_), dim=0)
+				dst = F.interpolate(dst, (128, 128), mode='nearest')
+				dst = dst.to('cpu').detach().numpy()
+				n, c, h, w = dst.shape
+				dst = dst.reshape(4,8,c,h,w)
+				dst = dst.transpose(0,3,1,4,2)
+				dst = dst.reshape(4*h,8*w,3)
+				dst = np.clip(dst*255., 0, 255).astype(np.uint8)
+				skio.imsave('out/img_%03d_%05d.png' % (iepoch, j), dst)
 
-#出力
-fig = plt.figure(figsize=(15,6))
-for i in range(0,5):
-	#上段に訓練データを配置
-	plt.subplot(2,5,i+1)
-	plt.imshow(imges[i].cpu().detach().numpy().transpose(1,2,0))
-	#下段に訓練データを配置
-	plt.subplot(2,5,5+i+1)
-	plt.imshow(fake_images[i].cpu().detach().numpy().transpose(1,2,0))
-fig.savefig("img/img.png")
+				losses_ = np.array(losses)
+				niter = losses_.shape[0]//100*100
+				x_iter = np.arange(100)*(niter//100) + niter//200
+				plt.plot(x_iter, losses_[:niter,0].reshape(100,-1).mean(1))
+				plt.plot(x_iter, losses_[:niter,1].reshape(100,-1).mean(1))
+				plt.tight_layout()
+				plt.savefig('out/loss_%03d_%05d.png' % (iepoch, j))
+				plt.clf()
 
-#もっと生成
-generate_number = 15#(5*generate_number)枚追加で生成する
-for i in range(0,generate_number):
-	fig = plt.figure(figsize=(15,6))
-	fixed_z = torch.randn(batch_size,z_dim)
-	fixed_z = fixed_z.view(fixed_z.size(0),fixed_z.size(1),1,1)
-	generated_images,am1,am2 = G_update(fixed_z.to(device))
-	for k in range(0,5):
-		plt.subplot(2,5,k+1)
-		plt.imshow(generated_images[k].cpu().detach().numpy().transpose(1,2,0))
-	fig.savefig("img/generated_{}.png".format(str(i+1)))
+				netG_mavg.train()
 
+			if j >= res_step*7:
+				break
+
+			if j%100==0:
+				coolGPU()
+
+		if j >= res_step*7:
+			break
 
 
