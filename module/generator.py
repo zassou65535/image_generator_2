@@ -6,12 +6,14 @@ from .base_module import *
 class Generator(nn.Module):
 	def __init__(self):
 		super().__init__()
-		# conv modules & toRGBs
+		#畳み込みモジュールの設定を1つずつしていく
 		scale = 1
 		inchs  = np.array([512,256,128,64,32, 16], dtype=np.uint32)*scale
 		outchs = np.array([256,128, 64,32,16,  8], dtype=np.uint32)*scale
 		sizes  = np.array([  4,  8, 16,32,64,128], dtype=np.uint32)
+		#最初の層のみ、それを示すフラグをTrueにしておく
 		firsts = np.array([True, False, False, False, False, False], dtype=np.bool)
+		#blockには畳み込み層を格納、toRGBsは入力されたデータを出力画像(RGB3チャネル)に変換するための層を格納
 		blocks, toRGBs = [], []
 		for s, inch, outch, first in zip(sizes, inchs, outchs, firsts):
 			blocks.append(ConvModuleG(s, inch, outch, first))
