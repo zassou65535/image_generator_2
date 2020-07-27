@@ -143,8 +143,9 @@ f __name__ == '__main__':
 
 			print('ep: %02d %04d lossG=%.10f lossD=%.10f' %
 				(iepoch, j, lossG.item(), lossD.item()))
-
+			#ログ取る用
 			losses.append([lossG.item(), lossD.item()])
+			#イテレーションをカウント
 			j += 1
 
 			if j%500==0:
