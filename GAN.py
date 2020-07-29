@@ -24,7 +24,7 @@ def gradient_penalty(netD, real, fake, res, batch_size, gamma=1):
 	g = g.reshape(batch_size, -1)
 	return ((g.norm(2,dim=1)/gamma-1.0)**2).mean()
 
-f __name__ == '__main__':
+if __name__ == '__main__':
 
 	device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
