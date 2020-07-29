@@ -14,8 +14,8 @@ def make_datapath_list():
 		path_list.append(path)
 		##読み込むパスを全部表示　必要ならコメントアウトを外す
 		#print(path)
-	##読み込むパスを全部表示　必要ならコメントアウトを外す
-	#print(str(len(path_list)))
+	#読み込んだ画像の数を表示
+	print("images : " + str(len(path_list)))
 	return path_list
 
 class ImageTransform():
