@@ -12,8 +12,10 @@ def make_datapath_list():
 	path_list = []#画像ファイルパスのリストを作り、戻り値とする
 	for path in glob.glob(target_path):
 		path_list.append(path)
-		print(path)
-	print(str(len(path_list)))
+		##読み込むパスを全部表示　必要ならコメントアウトを外す
+		#print(path)
+	##読み込むパスを全部表示　必要ならコメントアウトを外す
+	#print(str(len(path_list)))
 	return path_list
 
 class ImageTransform():
