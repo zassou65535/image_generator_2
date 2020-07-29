@@ -4,7 +4,11 @@ from .importer import *
 import os.path as osp
 
 def make_datapath_list():
-	target_path = "./*/*"
+	#読み込むデータセットのパス
+	#例えばディレクトリ「dataset」内に直接、画像データを入れているならば
+	#target_path = "./dataset/*"とします
+	#画像のファイル形式はpng
+	target_path = "./dataset/*/*"
 	path_list = []#画像ファイルパスのリストを作り、戻り値とする
 	for path in glob.glob(target_path):
 		path_list.append(path)
@@ -35,6 +39,7 @@ class GAN_Img_Dataset(data.Dataset):
 	def __getitem__(self,index):
 		img_path = self.file_list[index]
 		img = Image.open(img_path)#[RGB][高さ][幅]
+		img = img.convert('RGB')#pngをjpg形式に変換
 		img_transformed = self.transform(img)
 		return img_transformed
 

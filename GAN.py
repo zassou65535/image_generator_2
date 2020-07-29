@@ -28,9 +28,9 @@ if __name__ == '__main__':
 
 	device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-	netG = models.Generator().to(device)
-	netD = models.Discriminator().to(device)
-	netG_mavg = models.Generator().to(device) # moving average
+	netG = Generator().to(device)
+	netD = Discriminator().to(device)
+	netG_mavg = Generator().to(device) # moving average
 	#generator,discriminatorの誤差伝搬の最適化手法にはAdamを指定
 	optG = torch.optim.Adam(netG.parameters(), lr=0.0005, betas=(0.0, 0.99))
 	optD = torch.optim.Adam(netD.parameters(), lr=0.0005, betas=(0.0, 0.99))
@@ -82,7 +82,7 @@ if __name__ == '__main__':
 
 			#----------generaorの学習----------
 			#ノイズを生成
-			z = torch.randn(bs, 512*16).to(x.device)
+			z = torch.randn(batch_size, 512*16).to(x.device)
 			#ノイズをgeneratorに入力、出力画像をx_とする
 			x_ = netG.forward(z, res)
 			#出力画像x_をdiscriminatorで推論　つまり偽画像の入力をする
