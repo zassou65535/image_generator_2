@@ -38,11 +38,20 @@ if __name__ == '__main__':
 	#誤差関数の定義
 	criterion = torch.nn.BCELoss()
 
+	# dataset
+	# transform = transforms.Compose([transforms.CenterCrop(160),
+	#                                 transforms.Resize((128,128)),
+	#                                 transforms.ToTensor(), ])
+
+	# trainset = datasets.CelebA('~/data', download=True, split='train',
+	#                            transform=transform)
+
+	# bs = 8
+	# train_loader = DataLoader(trainset, batch_size=bs, shuffle=True)
+
 	#訓練データの読み込み、データセット作成
 	train_img_list = make_datapath_list()
-	mean = (0.5,)
-	std = (0.5,)
-	train_dataset = GAN_Img_Dataset(file_list=train_img_list,transform=ImageTransform(mean,std,resize_width_height_pixel=128))
+	train_dataset = GAN_Img_Dataset(file_list=train_img_list,transform=ImageTransform(resize_pixel=128))
 	#データローダー作成
 	batch_size = 8#ミニバッチあたりのサイズ
 	train_dataloader = torch.utils.data.DataLoader(train_dataset,batch_size=batch_size,shuffle=True)

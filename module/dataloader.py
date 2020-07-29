@@ -20,11 +20,10 @@ def make_datapath_list():
 
 class ImageTransform():
 	#画像の前処理クラス
-	def __init__(self,mean,std,resize_width_height_pixel):
+	def __init__(self,resize_pixel):
 		self.data_transform = transforms.Compose([
-				transforms.Resize(resize_width_height_pixel),
-				transforms.ToTensor(),
-				transforms.Normalize(mean,std)
+				transforms.Resize(resize_pixel),
+				transforms.ToTensor()
 			])
 	def __call__(self,img):
 		return self.data_transform(img)
