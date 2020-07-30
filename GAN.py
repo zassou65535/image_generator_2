@@ -58,7 +58,7 @@ if __name__ == '__main__':
 
 	#学習開始
 	#エポック数
-	nepoch = 1
+	nepoch = 15000*8
 	losses = []
 	#res_step回繰り返すごとに解像度を高める
 	res_step = 15000
