@@ -26,12 +26,11 @@ class Discriminator(nn.Module):
 		self.blocks = nn.ModuleList(blocks)
 	#resは進捗パラメーター
 	def forward(self, x, res):
-		# for the highest resolution
-		res = min(res, len(self.blocks))
-		# get integer by floor
+		#何層目まで畳み込みを計算するかをresとする
+		res = min(res, len(self.blocks))#resが畳み込み層の数より大きくならないようにする
 		eps = 1e-7
-		n = max(int(res-eps), 0)
-		# high resolution
+		n = max(int(res-eps),0)#resがeps以下なら0とみなす
+		#最初の層に通しておく
 		x_big = self.fromRGBs[n](x)
 		x_big = self.blocks[n](x_big)
 		if n==0:

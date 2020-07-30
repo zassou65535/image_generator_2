@@ -24,9 +24,9 @@ class Generator(nn.Module):
 		# to image
 		n,c = x.shape
 		x = x.reshape(n,c//16,4,4)
-		# for the highest resolution
-		res = min(res, len(self.blocks))
-		# get integer by floor
+		#何層目まで畳み込みを計算するかをresとする
+		res = min(res, len(self.blocks))#resが畳み込み層の数より大きくならないようにする
+		#0~(nlayer-1)層目まで畳み込みを計算する
 		nlayer = max(int(res-eps), 0)
 		for i in range(nlayer):
 			x = self.blocks[i](x)
