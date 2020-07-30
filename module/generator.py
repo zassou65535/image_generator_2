@@ -7,9 +7,8 @@ class Generator(nn.Module):
 	def __init__(self):
 		super().__init__()
 		#畳み込みモジュールの設定を1つずつしていく
-		scale = 1
-		inchs  = np.array([512,256,128,64,32, 16], dtype=np.uint32)*scale
-		outchs = np.array([256,128, 64,32,16,  8], dtype=np.uint32)*scale
+		inchs  = np.array([512,256,128,64,32, 16], dtype=np.uint32)
+		outchs = np.array([256,128, 64,32,16,  8], dtype=np.uint32)
 		sizes  = np.array([  4,  8, 16,32,64,128], dtype=np.uint32)
 		#最初の層のみ、それを示すフラグをTrueにしておく
 		firsts = np.array([True, False, False, False, False, False], dtype=np.bool)

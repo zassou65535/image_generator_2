@@ -65,12 +65,6 @@ class Conv2d(nn.Module):
 #generator用畳み込み層
 #generatorの最初の層のみUpsampleなし
 class ConvModuleG(nn.Module):
-	'''
-	引数:
-		out_size: (int), Ex.: 16 (解像度を表す)
-		inch: (int),  Ex.: 256
-		outch: (int), Ex.: 128
-	'''
 	def __init__(self, out_size, inch, outch, first=False):
 		super().__init__()
 		if first:
@@ -95,12 +89,6 @@ class ConvModuleG(nn.Module):
 #discriminator用の畳み込み層
 #discriminatorの最後の層のみMiniBatchStd（モード崩壊防止用モジュール）あり
 class ConvModuleD(nn.Module):
-	'''
-	引数:
-		out_size: (int), Ex.: 16 (解像度を表す)
-		inch: (int),  Ex.: 256
-		outch: (int), Ex.: 128
-	'''
 	def __init__(self, out_size, inch, outch, final=False):
 		super().__init__()
 		if final:

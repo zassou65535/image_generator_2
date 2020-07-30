@@ -8,12 +8,8 @@ class Discriminator(nn.Module):
 		super().__init__()
 		self.minbatch_std = MiniBatchStd()
 		#畳み込みモジュールの設定を1つずつしていく
-		scale = 1
-		#inchs:畳み込み層への入力データの解像度
-		inchs  = np.array([256,128, 64,32,16, 8], dtype=np.uint32)*scale
-		#outchs:畳み込み層からの出力データの解像度
-		outchs = np.array([512,256,128,64,32,16], dtype=np.uint32)*scale
-		#sizes:畳み込み層の入力チャネル数
+		inchs  = np.array([256,128, 64,32,16, 8], dtype=np.uint32)
+		outchs = np.array([512,256,128,64,32,16], dtype=np.uint32)
 		sizes  = np.array([  1,  4,  8,16,32,64], dtype=np.uint32)
 		#最後の層のみ、それを示すフラグをTrueにしておく
 		finals = np.array([True, False, False, False, False, False], dtype=np.bool)
