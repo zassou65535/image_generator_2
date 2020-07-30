@@ -58,10 +58,10 @@ if __name__ == '__main__':
 
 	#学習開始
 	#エポック数
-	nepoch = 15000*8
+	nepoch = 10000*8
 	losses = []
 	#res_step回繰り返すごとに解像度を高める
-	res_step = 15000
+	res_step = 10000
 	j = 0
 	# constant random inputs
 	z0 = torch.randn(16, 512*16).to(device)
