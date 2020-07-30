@@ -30,7 +30,7 @@ class Generator(nn.Module):
 		nlayer = max(int(res-eps), 0)
 		for i in range(nlayer):
 			x = self.blocks[i](x)
-		# high resolution
+		#最初の層に通しておく
 		x_big = self.blocks[nlayer](x)
 		dst_big = self.toRGBs[nlayer](x_big)
 		if nlayer==0:
