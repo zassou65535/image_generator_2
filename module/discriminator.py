@@ -29,19 +29,19 @@ class Discriminator(nn.Module):
 		#何層目まで畳み込みを計算するかをresとする
 		res = min(res, len(self.blocks))#resが畳み込み層の数より大きくならないようにする
 		eps = 1e-7
-		n = max(int(res-eps),0)#resがeps以下なら0とみなす
+		nlayer = max(int(res-eps),0)#resがeps以下なら0とみなす
 		#最初の層に通しておく
-		x_big = self.fromRGBs[n](x)
-		x_big = self.blocks[n](x_big)
-		if n==0:
+		x_big = self.fromRGBs[nlayer](x)
+		x_big = self.blocks[nlayer](x_big)
+		if nlayer==0:
 			x = x_big
 		else:
 			# low resolution
 			x_sml = F.adaptive_avg_pool2d(x, x_big.shape[2:4])
-			x_sml = self.fromRGBs[n-1](x_sml)
+			x_sml = self.fromRGBs[nlayer-1](x_sml)
 			alpha = res - int(res-eps)
 			x = (1-alpha)*x_sml + alpha*x_big
-		for i in range(n):
-			x = self.blocks[n-1-i](x)
+		for i in range(nlayer):
+			x = self.blocks[nlayer-1-i](x)
 		return x
 
