@@ -26,7 +26,7 @@ class Discriminator(nn.Module):
 		self.blocks = nn.ModuleList(blocks)
 	#resは進捗パラメーター
 	def forward(self, x, res):
-		#何層目まで畳み込みを計算するかをresとする
+		#何層目から0まで畳み込みを計算するかをresとする
 		res = min(res, len(self.blocks))#resが畳み込み層の数より大きくならないようにする
 		eps = 1e-7
 		nlayer = max(int(res-eps),0)#resがeps以下なら0とみなす
@@ -41,6 +41,7 @@ class Discriminator(nn.Module):
 			x_sml = self.fromRGBs[nlayer-1](x_sml)
 			alpha = res - int(res-eps)
 			x = (1-alpha)*x_sml + alpha*x_first
+		#順番に伝搬していく（インデックス番号(nlayer-1)から0まで）
 		for i in range(nlayer):
 			x = self.blocks[nlayer-1-i](x)
 		return x
