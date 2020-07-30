@@ -31,16 +31,16 @@ class Discriminator(nn.Module):
 		eps = 1e-7
 		nlayer = max(int(res-eps),0)#resがeps以下なら0とみなす
 		#最初の層に通しておく
-		x_big = self.fromRGBs[nlayer](x)
-		x_big = self.blocks[nlayer](x_big)
+		x_first = self.fromRGBs[nlayer](x)
+		x_first = self.blocks[nlayer](x_first)
 		if nlayer==0:
-			x = x_big
+			x = x_first
 		else:
 			# low resolution
-			x_sml = F.adaptive_avg_pool2d(x, x_big.shape[2:4])
+			x_sml = F.adaptive_avg_pool2d(x, x_first.shape[2:4])
 			x_sml = self.fromRGBs[nlayer-1](x_sml)
 			alpha = res - int(res-eps)
-			x = (1-alpha)*x_sml + alpha*x_big
+			x = (1-alpha)*x_sml + alpha*x_first
 		for i in range(nlayer):
 			x = self.blocks[nlayer-1-i](x)
 		return x

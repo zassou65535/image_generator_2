@@ -30,14 +30,14 @@ class Generator(nn.Module):
 		nlayer = max(int(res-eps), 0)
 		for i in range(nlayer):
 			x = self.blocks[i](x)
-		#最初の層に通しておく
-		x_big = self.blocks[nlayer](x)
-		dst_big = self.toRGBs[nlayer](x_big)
+		#最後の層（nlayer番目）
+		x_last = self.blocks[nlayer](x)
+		dst_big = self.toRGBs[nlayer](x_last)
 		if nlayer==0:
 			x = dst_big
 		else:
 			# low resolution
-			x_sml = F.interpolate(x, x_big.shape[2:4], mode='nearest')
+			x_sml = F.interpolate(x, x_last.shape[2:4], mode='nearest')
 			dst_sml = self.toRGBs[nlayer-1](x_sml)
 			alpha = res - int(res-eps)
 			x = (1-alpha)*dst_sml + alpha*dst_big
