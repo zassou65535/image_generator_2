@@ -62,13 +62,14 @@ if __name__ == '__main__':
 	losses = []
 	#res_step回繰り返すごとに解像度を高める
 	res_step = 10000
-	j = 0
+	#何回イテレーションしたかをiterationとする
+	iteration = 0
 	# constant random inputs
 	z0 = torch.randn(16, 512*16).to(device)
 	#z0はclampを用いて値の下限を-1、上限を1にしておく
 	z0 = torch.clamp(z0, -1.,1.)
 	for iepoch in range(nepoch):
-		if j==res_step*6.5:
+		if iteration==res_step*6.5:
 			optG.param_groups[0]['lr'] = 0.0001
 			optD.param_groups[0]['lr'] = 0.0001
 
@@ -78,7 +79,7 @@ if __name__ == '__main__':
 			x = imgs
 			#GPUが使えるならGPUへ転送
 			x = x.to(device)
-			res = j/res_step
+			res = iteration/res_step
 
 			#----------generaorの学習----------
 			#ノイズを生成
@@ -103,7 +104,7 @@ if __name__ == '__main__':
 
 			# update netG_mavg by moving average
 			momentum = 0.995 # remain momentum
-			alpha = min(1.0-(1/(j+1)), momentum)
+			alpha = min(1.0-(1/(iteration+1)), momentum)
 			for p_mavg, p in zip(netG_mavg.parameters(), netG.parameters()):
 				p_mavg.data = alpha*p_mavg.data + (1.0-alpha)*p.data
 
@@ -142,13 +143,13 @@ if __name__ == '__main__':
 			optD.step()
 
 			print('ep: %02d %04d lossG=%.10f lossD=%.10f' %
-				(iepoch, j, lossG.item(), lossD.item()))
+				(iepoch, iteration, lossG.item(), lossD.item()))
 			#ログ取る用
 			losses.append([lossG.item(), lossD.item()])
 			#イテレーションをカウント
-			j += 1
+			iteration += 1
 
-			if j%500==0:
+			if iteration%500==0:
 				#画像の出力を行う
 				netG_mavg.eval()
 				#ノイズを入力して画像を生成
@@ -173,7 +174,7 @@ if __name__ == '__main__':
 					#[height,width,channel]に変換する必要がある
 					plt.imshow(dst[i].transpose(1,2,0))
 				plt.subplots_adjust(wspace=0.8)#出力時の生成画像同士の余白を調整
-				output_fig.savefig('output_img/img_%03d_%05d.jpg' % (iepoch, j),dpi=300)
+				output_fig.savefig('output_img/img_%03d_%05d.jpg' % (iepoch,iteration),dpi=300)
 
 				plt.clf()
 				losses_ = np.array(losses)
@@ -182,14 +183,14 @@ if __name__ == '__main__':
 				plt.plot(x_iter, losses_[:niter,0].reshape(100,-1).mean(1))
 				plt.plot(x_iter, losses_[:niter,1].reshape(100,-1).mean(1))
 				plt.tight_layout()
-				plt.savefig('output_img/loss_%03d_%05d.jpg' % (iepoch, j),dpi=70)
+				plt.savefig('output_img/loss_%03d_%05d.jpg' % (iepoch,iteration),dpi=70)
 				plt.clf()
 
 				netG_mavg.train()
 
-			if j >= res_step*7:
+			if iteration >= res_step*7:
 				break
-		if j >= res_step*7:
+		if iteration >= res_step*7:
 			break
 
 
