@@ -189,8 +189,8 @@ if __name__ == '__main__':
 			if j >= res_step*7:
 				break
 
-			if j%100==0:
-				coolGPU()
+			# if j%100==0:
+			# 	coolGPU()
 
 		if j >= res_step*7:
 			break
