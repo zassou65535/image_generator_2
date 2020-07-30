@@ -6,7 +6,7 @@ from module.discriminator import *
 from module.generator import *
 from module.dataloader import *
 
-#discriminatorの損失関数の、勾配制約項の計算に必要な関数
+#discriminatorの損失関数の、勾配制約項の計算に必要な関数「gradient_penalty」
 #損失関数にはWGAN-GPを用いる
 #discriminatorでは、E[本物の画像の判定結果]-E[偽画像の判定結果]+勾配制約項　と表され、
 #generatorでは、E[偽画像の判定結果]と表される
@@ -59,6 +59,7 @@ if __name__ == '__main__':
 	#学習開始
 	#エポック数
 	nepoch = 10000*8
+	#lossesは記録用変数　学習には使わない
 	losses = []
 	#res_step回繰り返すごとに解像度を高める
 	res_step = 10000
