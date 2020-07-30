@@ -58,8 +58,9 @@ if __name__ == '__main__':
 
 	#学習開始
 	#エポック数
-	nepoch = 10
+	nepoch = 1
 	losses = []
+	#res_step回繰り返すごとに解像度を高める
 	res_step = 15000
 	j = 0
 	# constant random inputs
@@ -188,10 +189,6 @@ if __name__ == '__main__':
 
 			if j >= res_step*7:
 				break
-
-			# if j%100==0:
-			# 	coolGPU()
-
 		if j >= res_step*7:
 			break
 
