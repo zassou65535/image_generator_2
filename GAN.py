@@ -65,7 +65,7 @@ if __name__ == '__main__':
 	res_step = 3000
 	#何回イテレーションしたかをiterationとする
 	iteration = 0
-	# constant random inputs
+	#動作検証用のノイズ　学習の様子を見る用
 	z0 = torch.randn(16, 512*16).to(device)
 	#z0はclampを用いて値の下限を-1、上限を1にしておく
 	z0 = torch.clamp(z0, -1.,1.)
