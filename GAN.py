@@ -187,6 +187,8 @@ if __name__ == '__main__':
 				plt.savefig('output_img/loss_%03d_%05d.jpg' % (iepoch,iteration),dpi=70)
 				plt.clf()
 
+				plt.close()#作成したグラフがメモリに残り続けるのを防ぐ
+
 				netG_mavg.train()
 
 			if iteration >= res_step*7:
