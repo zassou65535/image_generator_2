@@ -78,7 +78,6 @@ if __name__ == '__main__':
 		#データローダーからminibatchずつ取り出す
 		for imgs in train_dataloader:
 			x = imgs
-			print(x.shape)
 			#GPUが使えるならGPUへ転送
 			x = x.to(device)
 			res = iteration/res_step
