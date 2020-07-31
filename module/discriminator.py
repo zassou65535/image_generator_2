@@ -8,11 +8,11 @@ class Discriminator(nn.Module):
 		super().__init__()
 		self.minbatch_std = MiniBatchStd()
 		#畳み込みモジュールの設定を1つずつしていく
-		inchs  = np.array([256,128, 64,32,16, 8], dtype=np.uint32)
-		outchs = np.array([512,256,128,64,32,16], dtype=np.uint32)
-		sizes  = np.array([  1,  4,  8,16,32,64], dtype=np.uint32)
+		inchs  = np.array([256,128, 64,32,16, 8,  4,  2],dtype=np.uint32)
+		outchs = np.array([512,256,128,64,32,16,  8,  4],dtype=np.uint32)
+		sizes  = np.array([  1,  4,  8,16,32,64,128,256],dtype=np.uint32)
 		#最後の層のみ、それを示すフラグをTrueにしておく
-		finals = np.array([True, False, False, False, False, False], dtype=np.bool)
+		finals = np.array([True,False,False,False,False,False,False,False],dtype=np.bool)
 		#blockには畳み込み層を格納、fromRGBsは入力画像(RGB3チャネル)を受け取るための層を格納
 		blocks, fromRGBs = [], []
 		for s, inch, outch, final in zip(sizes, inchs, outchs, finals):

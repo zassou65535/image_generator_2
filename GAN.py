@@ -51,18 +51,18 @@ if __name__ == '__main__':
 
 	#訓練データの読み込み、データセット作成
 	train_img_list = make_datapath_list()
-	train_dataset = GAN_Img_Dataset(file_list=train_img_list,transform=ImageTransform(resize_pixel=128))
+	train_dataset = GAN_Img_Dataset(file_list=train_img_list,transform=ImageTransform(resize_pixel=512))
 	#データローダー作成
 	batch_size = 8#ミニバッチあたりのサイズ
 	train_dataloader = torch.utils.data.DataLoader(train_dataset,batch_size=batch_size,shuffle=True)
 
 	#学習開始
 	#エポック数
-	nepoch = 10000*8
+	nepoch = 10000*9
 	#lossesは記録用変数　学習には使わない
 	losses = []
 	#res_step回繰り返すごとに解像度を高める
-	res_step = 10000
+	res_step = 3000
 	#何回イテレーションしたかをiterationとする
 	iteration = 0
 	# constant random inputs
@@ -70,7 +70,7 @@ if __name__ == '__main__':
 	#z0はclampを用いて値の下限を-1、上限を1にしておく
 	z0 = torch.clamp(z0, -1.,1.)
 	for iepoch in range(nepoch):
-		if iteration==res_step*6.5:
+		if iteration==res_step*8.5:
 			optG.param_groups[0]['lr'] = 0.0001
 			optD.param_groups[0]['lr'] = 0.0001
 
@@ -78,6 +78,7 @@ if __name__ == '__main__':
 		#データローダーからminibatchずつ取り出す
 		for imgs in train_dataloader:
 			x = imgs
+			print(x.shape)
 			#GPUが使えるならGPUへ転送
 			x = x.to(device)
 			res = iteration/res_step
@@ -159,7 +160,7 @@ if __name__ == '__main__':
 				x_ = netG_mavg.forward(z, res)
 
 				dst = torch.cat((x_0, x_), dim=0)
-				dst = F.interpolate(dst, (128, 128), mode='nearest')
+				dst = F.interpolate(dst, (512, 512), mode='nearest')
 				dst = dst.to('cpu').detach().numpy()
 				#それぞれ生成された画像の枚数、チャネル数、高さpixel、幅pixel
 				num_picture, channel, height, width = dst.shape
@@ -191,9 +192,9 @@ if __name__ == '__main__':
 
 				netG_mavg.train()
 
-			if iteration >= res_step*7:
+			if iteration >= res_step*9:
 				break
-		if iteration >= res_step*7:
+		if iteration >= res_step*9:
 			break
 
 
