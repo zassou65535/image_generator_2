@@ -159,7 +159,7 @@ if __name__ == '__main__':
 				x_ = netG_mavg.forward(z, res)
 
 				dst = torch.cat((x_0, x_), dim=0)
-				dst = F.interpolate(dst, (512, 512), mode='nearest')
+				dst = F.interpolate(dst, (256,256), mode='nearest')
 				dst = dst.to('cpu').detach().numpy()
 				#それぞれ生成された画像の枚数、チャネル数、高さpixel、幅pixel
 				num_picture, channel, height, width = dst.shape
