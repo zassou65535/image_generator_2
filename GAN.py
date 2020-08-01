@@ -51,18 +51,18 @@ if __name__ == '__main__':
 
 	#訓練データの読み込み、データセット作成
 	train_img_list = make_datapath_list()
-	train_dataset = GAN_Img_Dataset(file_list=train_img_list,transform=ImageTransform(resize_pixel=512))
+	train_dataset = GAN_Img_Dataset(file_list=train_img_list,transform=ImageTransform(resize_pixel=256))
 	#データローダー作成
 	batch_size = 8#ミニバッチあたりのサイズ
 	train_dataloader = torch.utils.data.DataLoader(train_dataset,batch_size=batch_size,shuffle=True)
 
 	#学習開始
 	#エポック数
-	nepoch = 10000*9+1
+	nepoch = 10000*8+1
 	#lossesは記録用変数　学習には使わない
 	losses = []
 	#res_step回繰り返すごとに解像度を高める
-	res_step = 3000
+	res_step = 7500
 	#何回イテレーションしたかをiterationとする
 	iteration = 0
 	#動作検証用のノイズ　学習の様子を見る用
@@ -70,7 +70,7 @@ if __name__ == '__main__':
 	#z0はclampを用いて値の下限を-1、上限を1にしておく
 	z0 = torch.clamp(z0, -1.,1.)
 	for iepoch in range(nepoch):
-		if iteration==res_step*8.5:
+		if iteration==res_step*7.5:
 			optG.param_groups[0]['lr'] = 0.0001
 			optD.param_groups[0]['lr'] = 0.0001
 
@@ -191,9 +191,9 @@ if __name__ == '__main__':
 
 				netG_mavg.train()
 
-			if iteration >= res_step*9:
+			if iteration >= res_step*8:
 				break
-		if iteration >= res_step*9:
+		if iteration >= res_step*8:
 			break
 
 
