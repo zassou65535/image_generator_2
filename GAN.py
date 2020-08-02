@@ -57,19 +57,20 @@ if __name__ == '__main__':
 	train_dataloader = torch.utils.data.DataLoader(train_dataset,batch_size=batch_size,shuffle=True)
 
 	#学習開始
-	#エポック数
-	nepoch = 10000*8+1
-	#lossesは記録用変数　学習には使わない
+	#lossesはグラフの出力のための記録用変数　学習には使わない
 	losses = []
 	#res_step回繰り返すごとに解像度を高める
-	res_step = 7500
+	res_step = 8000
 	#何回イテレーションしたかをiterationとする
 	iteration = 0
 	#動作検証用のノイズ　学習の様子を見る用
 	z0 = torch.randn(16, 512*16).to(device)
 	#z0はclampを用いて値の下限を-1、上限を1にしておく
 	z0 = torch.clamp(z0, -1.,1.)
-	for iepoch in range(nepoch):
+	#学習は合計res_step*8回行う
+	#res_step回繰り返すごとに解像度が高まっていく
+	while(iteration<res_step*8):
+		#学習が終わりに近づいてきたら学習率を下げる
 		if iteration==res_step*7.5:
 			optG.param_groups[0]['lr'] = 0.0001
 			optD.param_groups[0]['lr'] = 0.0001
@@ -143,8 +144,8 @@ if __name__ == '__main__':
 			#実際に誤差伝搬を行う
 			optD.step()
 
-			print('ep: %02d %04d lossG=%.10f lossD=%.10f' %
-				(iepoch, iteration, lossG.item(), lossD.item()))
+			print('floor(res)=%02d iteration=%06d lossG=%.10f lossD=%.10f' %
+				(max(int(res-1e-7),0), iteration, lossG.item(), lossD.item()))
 			#ログ取る用
 			losses.append([lossG.item(), lossD.item()])
 			#イテレーションをカウント
@@ -175,25 +176,24 @@ if __name__ == '__main__':
 					#[height,width,channel]に変換する必要がある
 					plt.imshow(dst[i].transpose(1,2,0))
 				plt.subplots_adjust(wspace=0.8)#出力時の生成画像同士の余白を調整
-				output_fig.savefig('output_img/img_%03d_%05d.jpg' % (iepoch,iteration),dpi=300)
+				output_fig.savefig('output_img/img_%d_%05d.jpg' % (max(int(res-1e-7),0),iteration),dpi=300)
 
-				plt.clf()
-				losses_ = np.array(losses)
-				niter = losses_.shape[0]//100*100
-				x_iter = np.arange(100)*(niter//100) + niter//200
-				plt.plot(x_iter, losses_[:niter,0].reshape(100,-1).mean(1))
-				plt.plot(x_iter, losses_[:niter,1].reshape(100,-1).mean(1))
-				plt.tight_layout()
-				plt.savefig('output_img/loss_%03d_%05d.jpg' % (iepoch,iteration),dpi=70)
 				plt.clf()
 
 				plt.close()#作成したグラフがメモリに残り続けるのを防ぐ
 
 				netG_mavg.train()
 
-			if iteration >= res_step*8:
+			#学習が終わるとループを抜けるが、その際にlossのグラフを出力する
+			if iteration == res_step*8:
+				losses_ = np.array(losses)
+				niter = losses_.shape[0]//100*100
+				x_iter = np.arange(100)*(niter//100) + niter//200
+				plt.plot(x_iter, losses_[:niter,0].reshape(100,-1).mean(1))
+				plt.plot(x_iter, losses_[:niter,1].reshape(100,-1).mean(1))
+				plt.tight_layout()
+				plt.savefig('output_img/loss.jpg',dpi=70)
+				plt.clf()
 				break
-		if iteration >= res_step*8:
-			break
 
 
