@@ -12,7 +12,8 @@ python 3.7.1
 * `PGGAN_inference.py`は`PGGAN_train.py`が出力した学習結果をGeneratorに読み込み推論を実行、生成画像を出力するプログラムです。 
 
 ## 使い方
-1. `dataset`ディレクトリに、学習に使いたい画像を`./dataset/*/*`という形式で好きな数入れます(画像のファイル形式はpng)
+1. `PGGAN_train.py`のあるディレクトリに`./dataset`ディレクトリを作成します
+1. `./dataset`ディレクトリに、学習に使いたい画像を`./dataset/*/*`という形式で好きな数入れます(画像のファイル形式はpng)
 1. `PGGAN_train.py`の置いてあるディレクトリで`python PGGAN_train.py`を実行して学習を開始します
 	* 学習の過程が`./output_img/pggan_train/`以下に出力されます
 	* 学習結果が`generator_trained_model_cpu.pth`として出力されます
