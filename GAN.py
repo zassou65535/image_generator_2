@@ -185,7 +185,9 @@ if __name__ == '__main__':
 				netG_mavg.train()
 
 			#学習が終わるとループを抜けるが、その際にlossのグラフを出力する
+			#学習済みモデルの出力も行う
 			if iteration == res_step*8:
+				#lossのグラフを出力する
 				losses_ = np.array(losses)
 				niter = losses_.shape[0]//100*100
 				x_iter = np.arange(100)*(niter//100) + niter//200
@@ -194,6 +196,9 @@ if __name__ == '__main__':
 				plt.tight_layout()
 				plt.savefig('output_img/loss.jpg',dpi=70)
 				plt.clf()
+				#学習済みモデル(generator「netG_mavg」)の出力を行う
+				#学習済みモデル（CPU向け）を出力
+				torch.save(netG_mavg.to('cpu').state_dict(),'output_model/generator_trained_model_cpu.pth')
 				break
 
 
