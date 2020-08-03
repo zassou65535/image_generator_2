@@ -26,9 +26,6 @@ for i in range(0,picture.shape[0]):
 	output_fig.savefig('output_img/pggan_inference/img_%d.jpg' % (i+1),dpi=300)
 	plt.close()
 
-# dst = torch.cat((x_0, x_), dim=0)
-# dst = F.interpolate(dst, (256,256), mode='nearest')
-
 
 
 
