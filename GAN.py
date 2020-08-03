@@ -70,11 +70,6 @@ if __name__ == '__main__':
 	#学習は合計res_step*8回行う
 	#res_step回繰り返すごとに解像度が高まっていく
 	while(iteration<res_step*8):
-		#学習が終わりに近づいてきたら学習率を下げる
-		if iteration==res_step*7.5:
-			optG.param_groups[0]['lr'] = 0.0001
-			optD.param_groups[0]['lr'] = 0.0001
-
 		#for i, data in enumerate(train_loader):
 		#データローダーからminibatchずつ取り出す
 		for imgs in train_dataloader:
