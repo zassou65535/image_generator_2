@@ -1,6 +1,7 @@
 #encoding:utf-8
 
 import glob
+import os as os
 import os.path as osp
 import random
 import numpy as np
