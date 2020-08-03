@@ -18,7 +18,7 @@ python 3.7.1
 	* 学習結果が`generator_trained_model_cpu.pth`として出力されます
 1. `PGGAN_inference.py`の置いてあるディレクトリで`python PGGAN_inference.py`を実行して推論します
 	* 推論結果が`./output_img/pggan_inference/`以下に出力されます
-	* `PGGAN_inference.py`の置いてあるディレクトリに`generator_trained_model_cpu.pth`がなければエラーとなります
+	* 注意点として、`PGGAN_inference.py`の置いてあるディレクトリに`generator_trained_model_cpu.pth`がなければエラーとなります
 
 学習には環境によっては10時間以上要する場合があります。    
 入力された画像は256×256にリサイズされた上で学習に使われます。出力画像も256×256です。 
