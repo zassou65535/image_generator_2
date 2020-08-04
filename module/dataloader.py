@@ -23,6 +23,7 @@ class ImageTransform():
 	def __init__(self,resize_pixel):
 		self.data_transform = transforms.Compose([
 				transforms.Resize(resize_pixel),
+				transforms.ColorJitter(contrast=[1.0,2.0]),#データオーギュメンテーションを実行、コントラストをランダムに変える
 				transforms.ToTensor()
 			])
 	def __call__(self,img):
@@ -47,9 +48,7 @@ class GAN_Img_Dataset(data.Dataset):
 #動作確認
 # train_img_list = make_datapath_list()
 
-# mean = (0.5,)
-# std = (0.5,)
-# train_dataset = GAN_Img_Dataset(file_list=train_img_list,transform=ImageTransform(mean,std,resize_width_height_pixel=256))
+# train_dataset = GAN_Img_Dataset(file_list=train_img_list,transform=ImageTransform(resize_pixel=256))
 
 # batch_size = 1
 # train_dataloader = torch.utils.data.DataLoader(train_dataset,batch_size=batch_size,shuffle=True)
@@ -61,7 +60,7 @@ class GAN_Img_Dataset(data.Dataset):
 # fig = plt.figure()
 # img_transformed = imgs[0].detach().numpy().transpose(1,2,0)
 # plt.imshow(img_transformed)
-# fig.savefig("img/img.png")
+# fig.savefig("img.png")
 
 
 
