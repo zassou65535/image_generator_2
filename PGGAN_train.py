@@ -183,7 +183,7 @@ if __name__ == '__main__':
 				#画像出力用にディレクトリを作成
 				os.makedirs("output_img/pggan_train",exist_ok=True)
 				#保存の実行
-				output_fig.savefig('output_img/pggan_train/img_%d_%05d.jpg' % (max(int(res-1e-7),0),iteration),dpi=300)
+				output_fig.savefig('output_img/pggan_train/img_%d_%06d.jpg' % (max(int(res-1e-7),0),iteration),dpi=300)
 
 				plt.clf()
 
