@@ -60,7 +60,7 @@ if __name__ == '__main__':
 	#lossesはグラフの出力のための記録用変数　学習には使わない
 	losses = []
 	#res_step回繰り返すごとに解像度を高める
-	res_step = 7500
+	res_step = 15000
 	#何回イテレーションしたかをiterationとする
 	iteration = 0
 	#generatorに入力する、動作検証用のノイズ　学習の様子を見る用
@@ -72,8 +72,8 @@ if __name__ == '__main__':
 	while(iteration<res_step*8):
 		#学習が終わりに近づいてきたら学習率を下げる
 		if iteration==res_step*7.5:
-			optG.param_groups[0]['lr'] = 0.00025
-			optD.param_groups[0]['lr'] = 0.00025
+			optG.param_groups[0]['lr'] = 0.0001
+			optD.param_groups[0]['lr'] = 0.0001
 
 		#for i, data in enumerate(train_loader):
 		#データローダーからminibatchずつ取り出す
