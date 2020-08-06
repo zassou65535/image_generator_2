@@ -32,7 +32,7 @@ class Discriminator(nn.Module):
 		if nlayer==0:
 			x = x_first
 		else:
-			# low resolution
+			#1個下の解像度と混ぜ合わせるようにしながら学習を行う
 			x_sml = F.adaptive_avg_pool2d(x, x_first.shape[2:4])
 			x_sml = self.fromRGBs[nlayer-1](x_sml)
 			alpha = res - int(res-eps)

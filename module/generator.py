@@ -35,7 +35,7 @@ class Generator(nn.Module):
 		if nlayer==0:
 			x = dst_big
 		else:
-			# low resolution
+			#1個下の解像度と混ぜ合わせるようにしながら学習を行う
 			x_sml = F.interpolate(x, x_last.shape[2:4], mode='nearest')
 			dst_sml = self.toRGBs[nlayer-1](x_sml)
 			alpha = res - int(res-eps)
