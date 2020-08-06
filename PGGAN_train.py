@@ -18,8 +18,9 @@ def gradient_penalty(netD, real, fake, res, batch_size, gamma=1):
 	x = alpha*real + (1-alpha)*fake
 	#それをdiscriminatorに入れ、結果をd_とする
 	d_ = netD.forward(x, res)
-	#出力d_と入力xから傾きを求める　これが1になると良い結果を生むことが知られている
-	#よってこれが1になるようgradient_penaltyを計算
+	#出力d_と入力xから傾きを求める
+	#傾きから計算されるL2ノルムが1になると良い結果を生むことが知られている
+	#よってこれが1に近づくような学習ができるようにgradient_penaltyを計算
 	g = torch.autograd.grad(outputs=d_, inputs=x,
 							grad_outputs=torch.ones(d_.shape).to(device),
 							create_graph=True, retain_graph=True,only_inputs=True)[0]
