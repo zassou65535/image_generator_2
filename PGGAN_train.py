@@ -60,7 +60,7 @@ if __name__ == '__main__':
 	#lossesはグラフの出力のための記録用変数　学習には使わない
 	losses = []
 	#res_step回繰り返すごとに解像度を高める
-	res_step = 15000
+	res_step = 7500
 	#何回イテレーションしたかをiterationとする
 	iteration = 0
 	#generatorに入力する、動作検証用のノイズ　学習の様子を見る用

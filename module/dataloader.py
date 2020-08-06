@@ -23,7 +23,6 @@ class ImageTransform():
 	def __init__(self,resize_pixel):
 		self.data_transform = transforms.Compose([
 				transforms.Resize(resize_pixel),
-				transforms.ColorJitter(contrast=[1.0,2.0]),#データオーギュメンテーションを実行、コントラストをランダムに変える
 				transforms.ToTensor()
 			])
 	def __call__(self,img):
