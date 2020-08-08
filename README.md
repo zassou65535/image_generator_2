@@ -1,7 +1,7 @@
 # image_generator_2
 ## 概要
 メルアイコン生成器 version2で用いたソースコードです。  
-詳しい解説は<a href="">こちら</a>。
+詳しい解説は<a href="https://qiita.com/zassou65535/items/57fe3bd677159cdb2528">こちら</a>。
 
 ## 想定環境
 python 3.7.1  
@@ -21,5 +21,5 @@ python 3.7.1
 	* 推論結果が`./output_img/pggan_inference/`以下に出力されます
 	* 注意点として、`PGGAN_inference.py`の置いてあるディレクトリに`generator_trained_model_cpu.pth`がなければエラーとなります
 
-学習には環境によっては10時間以上要する場合があります。    
+学習には環境によっては12時間以上要する場合があります。    
 入力された画像は256×256にリサイズされた上で学習に使われます。出力画像も256×256です。 
