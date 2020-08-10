@@ -22,7 +22,7 @@ class ImageTransform():
 	#画像の前処理クラス
 	def __init__(self,resize_pixel):
 		self.data_transform = transforms.Compose([
-				transforms.Resize(resize_pixel),
+				transforms.Resize((resize_pixel,resize_pixel)),
 				transforms.ToTensor()
 			])
 	def __call__(self,img):
